@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Search Bar Component</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Search Form - Responsive */
+        .search-form {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: visible;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23666" d="M10.77 18.3a7.53 7.53 0 1 1 7.53-7.53a7.53 7.53 0 0 1-7.53 7.53Zm0-13.55a6 6 0 1 0 6 6a6 6 0 0 0-6-6Z"/><path fill="%23666" d="M20 20.75a.74.74 0 0 1-.53-.22l-4.13-4.13a.75.75 0 0 1 1.06-1.06l4.13 4.13a.75.75 0 0 1 0 1.06a.74.74 0 0 1-.53.22Z"/></svg>') no-repeat center;
+            background-size: contain;
+            z-index: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #333;
+            background: transparent;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .category-dropdown {
+            position: relative;
+            border-left: 1px solid #e0e0e0;
+            min-width: 200px;
+            z-index: 10;
+        }
+
+        .category-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #666;
+            background: transparent;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .category-trigger:hover {
+            background: #f9f9f9;
+        }
+
+        .category-trigger.active {
+            background: #f9f9f9;
+        }
+
+        .dropdown-arrow {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid #666;
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .category-trigger.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .category-menu {
+            position: absolute;
+            top: calc(100% + 1px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .category-menu.active {
+            display: block !important;
+        }
+
+        .category-option {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            text-align: left;
+            color: #333;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .category-option:last-child {
+            border-bottom: none;
+        }
+
+        .category-option:hover {
+            background: #f5f5f5;
+        }
+
+        .category-option.selected {
+            background: #e8f4f8;
+            color: #007cba;
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .search-form {
+                border-radius: 4px;
+            }
+
+            .search-input-wrapper::before {
+                left: auto;
+                right: 15px;
+            }
+
+            .search-input {
+                padding: 12px 50px 12px 20px;
+            }
+
+            .category-dropdown {
+                display: none;
+            }
+        }
+
+        /* Demo styles */
+        .demo-section {
+            margin-bottom: 40px;
+        }
+
+        .demo-title {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        .device-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #007cba;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+
+        @media (max-width: 768px) {
+            .device-indicator::after {
+                content: " (Mobile)";
+            }
+        }
+
+        @media (min-width: 769px) {
+            .device-indicator::after {
+                content: " (Desktop)";
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="device-indicator">Current View</div>
+
+    <div class="container">
+        <div class="demo-section">
+            <h2 class="demo-title">Responsive Search Bar</h2>
+
+            <form class="search-form" role="search" method="get" action="/">
+                <div class="search-input-wrapper">
+                    <input type="text" class="search-input" placeholder="Search for products" name="s"
+                        aria-label="Search" required>
+                </div>
+
+                <div class="category-dropdown">
+                    <button type="button" class="category-trigger" id="categoryTrigger">
+                        <span class="category-text">SELECT CATEGORY</span>
+                        <div class="dropdown-arrow"></div>
+                    </button>
+                    <div class="category-menu" id="categoryMenu">
+                        <button type="button" class="category-option" data-value="0">All Categories</button>
+                        <button type="button" class="category-option" data-value="accessoire">Accessories</button>
+                        <button type="button" class="category-option" data-value="casque-ecouteurs">Écouteurs</button>
+                        <button type="button" class="category-option" data-value="montres-connectees">Montres
+                            connectées</button>
+                        <button type="button" class="category-option" data-value="tablette">Tablette</button>
+                        <button type="button" class="category-option" data-value="telephone">Téléphone</button>
+                    </div>
+                    <input type="hidden" name="product_cat" id="selectedCategory" value="0">
+                </div>
+            </form>
+        </div>
+
+        <div class="note">
+            <strong>✨ Responsive Design:</strong>
+            <ul style="margin-top: 10px; padding-left: 20px;">
+                <li><strong>Desktop (>768px):</strong> Search input with icon on left + Category dropdown</li>
+                <li><strong>Mobile (≤768px):</strong> Squared input with icon on right + No categories</li>
+            </ul>
+            <br>
+            <strong>🎯 Benefits:</strong>
+            <ul style="margin-top: 5px; padding-left: 20px;">
+                <li>Single form - no duplication</li>
+                <li>Clean responsive CSS</li>
+                <li>Better for Shopify themes</li>
+                <li>Easier maintenance</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Minimal JavaScript for dropdown functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.querySelector('.search-input');
+            const categoryTrigger = document.getElementById('categoryTrigger');
+            const categoryMenu = document.getElementById('categoryMenu');
+            const categoryOptions = document.querySelectorAll('.category-option');
+            const selectedCategoryInput = document.getElementById('selectedCategory');
+            const categoryText = document.querySelector('.category-text');
+
+            // Search input focus effects
+            if (searchInput) {
+                searchInput.addEventListener('focus', function () {
+                    this.parentElement.style.boxShadow = '0 4px 12px rgba(0,123,186,0.15)';
+                });
+
+                searchInput.addEventListener('blur', function () {
+                    this.parentElement.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                });
+
+                // Search onChange functionality
+                searchInput.addEventListener('input', function () {
+                    const query = this.value.trim();
+                    if (query.length >= 3) {
+                        const category = selectedCategoryInput ? selectedCategoryInput.value : '0';
+                        console.log('Searching for:', query, 'in category:', category);
+                        // Integrate with Shopify search here
+                    }
+                });
+            }
+
+            // Dropdown functionality (only for desktop)
+            if (categoryTrigger && categoryMenu && window.innerWidth > 768) {
+                categoryTrigger.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const isActive = categoryMenu.classList.contains('active');
+
+                    if (isActive) {
+                        categoryMenu.classList.remove('active');
+                        categoryTrigger.classList.remove('active');
+                    } else {
+                        categoryMenu.classList.add('active');
+                        categoryTrigger.classList.add('active');
+                    }
+                });
+
+                categoryOptions.forEach(option => {
+                    option.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const value = this.getAttribute('data-value');
+                        const text = this.textContent;
+
+                        selectedCategoryInput.value = value;
+                        categoryText.textContent = text;
+
+                        categoryOptions.forEach(opt => opt.classList.remove('selected'));
+                        this.classList.add('selected');
+
+                        categoryMenu.classList.remove('active');
+                        categoryTrigger.classList.remove('active');
+
+                        // Trigger search if query exists
+                        const query = searchInput.value.trim();
+                        if (query.length >= 3) {
+                            console.log('Searching for:', query, 'in category:', value);
+                        }
+                    });
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!categoryTrigger.contains(e.target) && !categoryMenu.contains(e.target)) {
+                        categoryMenu.classList.remove('active');
+                        categoryTrigger.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
