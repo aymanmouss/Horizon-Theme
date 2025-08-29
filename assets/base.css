@@ -9,6 +9,7 @@ body {
   flex-direction: column;
   margin: 0;
   min-height: 100svh;
+  font-variation-settings: 'slnt' 0;
 }
 
 :root {
@@ -717,6 +718,14 @@ placeholder-image > img {
   object-fit: cover;
   aspect-ratio: var(--ratio);
   height: 100%;
+}
+
+[data-placeholder='true'] * {
+  cursor: default;
+}
+
+slideshow-component [data-placeholder='true'] * {
+  cursor: grab;
 }
 
 /* Base text and heading styles */
@@ -1536,17 +1545,6 @@ media-gallery {
   }
 }
 
-@media screen and (min-width: 750px) {
-  /* The desktop layout doesn't stretch vertically as it should in Safari */
-  :not(.dialog-zoomed-gallery) > .product-media-container {
-    height: var(--constrained-height, auto);
-  }
-
-  .quick-add-modal__content .product-media-container {
-    --constrained-height: auto;
-  }
-}
-
 media-gallery:where(.media-gallery--grid) .media-gallery__grid {
   display: none;
 }
@@ -1622,6 +1620,11 @@ media-gallery.media-gallery--grid .media-gallery__grid .product-media-container 
   height: 100%;
   z-index: var(--layer-flat);
   cursor: zoom-in;
+  background-color: transparent;
+
+  &:hover {
+    background-color: transparent;
+  }
 }
 
 zoom-dialog dialog {
@@ -1662,9 +1665,32 @@ zoom-dialog dialog {
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  animation: elementSlideInBottom var(--animation-speed) var(--animation-easing) forwards;
-  animation-delay: calc(var(--animation-speed) * 2);
+
+  /* For the outline radius */
+  border-radius: 50%;
+}
+
+/* This triggers iOS < 16.4. The outline bug is not recognized as a lack of @supports */
+
+@supports not (background-color: rgb(from red 150 g b / alpha)) {
+  /**
+    There is a bug in safari < 16.4 that causes the outline to not follow the elements border radius. This is a workaround.
+    Using element selector to increase specificity.
+  **/
+
+  .close-button:focus-visible {
+    outline: none;
+    overflow: visible;
+  }
+
+  .close-button:focus-visible::after {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--focus-outline-offset));
+    border: var(--focus-outline-width) solid currentColor;
+    border-radius: 50%;
+    display: inherit;
+  }
 }
 
 .dialog--closed .close-button {
@@ -1742,8 +1768,8 @@ zoom-dialog dialog {
 }
 
 .close-button svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
 }
 
 /* Product media */
@@ -2061,19 +2087,23 @@ deferred-media[class] :is(.deferred-media__poster-button img, .deferred-media__p
 
 .unit-price {
   display: block;
-  font-size: 0.85em;
+  font-size: min(0.85em, var(--font-paragraph--size));
   color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+}
+
+.tax-note.tax-note.tax-note {
+  font-size: min(0.85em, var(--font-paragraph--size));
+  color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+}
+
+product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) > *:not(.tax-note) {
+  margin-block: 0;
 }
 
 .compare-at-price {
   opacity: 0.4;
   text-decoration-line: line-through;
   text-decoration-thickness: 1.5px;
-}
-
-.tax-note,
-.unit-price {
-  color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
 }
 
 .card-gallery {
@@ -2320,6 +2350,7 @@ deferred-media[class] :is(.deferred-media__poster-button img, .deferred-media__p
   color: var(--color-input-text);
   border: none;
   outline: none;
+  font-size: var(--font-paragraph--size);
 
   &:autofill {
     background-color: var(--color-input-background);
@@ -3216,6 +3247,10 @@ slideshow-slide {
   }
 }
 
+slideshow-slide.product-media-container--tallest {
+  content-visibility: visible;
+}
+
 @media screen and (max-width: 749px) {
   /* Media gallery has a peeking slide on the right side always, and on the left side when the current slide is the last one */
   .media-gallery--hint
@@ -4004,30 +4039,6 @@ slideshow-arrows .slideshow-control.slideshow-control--style-none {
 
 .layout-panel-flex--column > .group-block--height-custom {
   flex-basis: var(--size-style-height);
-}
-
-.search-input {
-  width: 100%;
-  color: var(--color-foreground);
-  padding-block: var(--padding-lg);
-  padding-inline: calc(var(--margin-lg) + var(--icon-size-lg)) 0;
-  background: transparent;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  outline: none;
-  border: 0;
-
-  &:focus-visible {
-    outline: none;
-  }
-}
-
-.search-input:focus {
-  outline: none;
-}
-
-.search-input::placeholder {
-  color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
 }
 
 accordion-custom {
